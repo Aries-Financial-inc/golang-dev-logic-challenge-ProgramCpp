@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"github.com/stretchr/testify/assert"
-	"github.com/path/to/your/package/models"
-	"github.com/path/to/your/package/controllers"
+	"github.com/aries-financial-inc/options-service/models"
+	"github.com/aries-financial-inc/options-service/controllers"
 )
 
 func TestOptionsContractModelValidation(t *testing.T) {
