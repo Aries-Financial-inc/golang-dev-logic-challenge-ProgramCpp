@@ -21,12 +21,12 @@ const (
 )
 
 type OptionsContract struct {
-	OptionsType    optionsType
-	StrikePrice    float64
-	BidPrice       float64
-	AskPrice       float64
-	ExpirationDate time.Time
-	Position       position
+	OptionsType    optionsType `json:"type"`
+	StrikePrice    float64     `json:"strike_price"`
+	BidPrice       float64     `json:"bid"`
+	AskPrice       float64     `json:"ask"`
+	ExpirationDate time.Time   `json:"expiration_date"`
+	Position       position    `json:"position"`
 }
 
 func (o OptionsContract) IsValid() error {

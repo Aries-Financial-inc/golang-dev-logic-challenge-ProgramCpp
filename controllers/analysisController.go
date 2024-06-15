@@ -2,12 +2,9 @@ package controllers
 
 import (
 	"net/http"
-)
 
-// OptionsContract represents the data structure of an options contract
-type OptionsContract struct {
-	// Your code here
-}
+	"github.com/aries-financial-inc/options-service/models"
+)
 
 // AnalysisResponse represents the data structure of the analysis result
 type AnalysisResponse struct {
@@ -27,22 +24,22 @@ func AnalysisHandler(w http.ResponseWriter, r *http.Request) {
 	// Your code here
 }
 
-func calculateXYValues(contracts []OptionsContract) []XYValue {
+func calculateXYValues(contracts []models.OptionsContract) []XYValue {
 	// Your code here
 	return nil
 }
 
-func calculateMaxProfit(contracts []OptionsContract) float64 {
+func calculateMaxProfit(contracts []models.OptionsContract) float64 {
 	// Your code here
 	return 0
 }
 
-func calculateMaxLoss(contracts []OptionsContract) float64 {
+func calculateMaxLoss(contracts []models.OptionsContract) float64 {
 	// Your code here
 	return 0
 }
 
-func calculateBreakEvenPoints(contracts []OptionsContract) []float64 {
+func calculateBreakEvenPoints(contracts []models.OptionsContract) []float64 {
 	// Your code here
 	return nil
 }
