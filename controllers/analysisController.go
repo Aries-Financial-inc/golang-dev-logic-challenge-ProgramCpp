@@ -67,6 +67,14 @@ func AnalysisHandler(w http.ResponseWriter, r *http.Request) {
 // for visialization of profit and loss, the range of X, is +/- 25% of break-even price
 func calculateXYValues(contracts []options.OptionsContract) []XYValue {
 	xyValues := []XYValue{}
+	for _, c := range contracts {
+		breakEven := c.CalculateBreakEvenPoint()
+		minX := breakEven - (0.25 * breakEven)
+		maxX := breakEven + (0.25 * breakEven)
+		xyValues = append(xyValues, XYValue{breakEven, c.CalculateProfitOrLoss(breakEven)})
+		xyValues = append(xyValues, XYValue{minX, c.CalculateProfitOrLoss(minX)})
+		xyValues = append(xyValues, XYValue{maxX, c.CalculateProfitOrLoss(maxX)})
+	}
 	return xyValues
 }
 
