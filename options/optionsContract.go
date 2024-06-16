@@ -1,4 +1,5 @@
-package models
+// for a API server, the idiomatic approach to design packages is to package by domain entities
+package options
 
 import (
 	"strings"
@@ -46,6 +47,7 @@ func (l longShort) IsValid() error {
 }
 
 type OptionsContract struct {
+	// cannot name the variable "type"
 	OptionsType    optionsType `json:"type"`
 	StrikePrice    float64     `json:"strike_price"`
 	Bid            float64     `json:"bid"`
@@ -84,4 +86,12 @@ func (o OptionsContract) IsValid() error {
 	}
 
 	return nil
+}
+
+func (o OptionsContract) CalculateBreakEvenPoint() float64 {
+	return 0.0
+}
+
+func (o OptionsContract) CalculateProfitOrLoss(price float64) float64 {
+	return 0.0
 }

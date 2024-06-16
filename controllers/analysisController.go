@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/aries-financial-inc/options-service/models"
+	"github.com/aries-financial-inc/options-service/options"
 )
 
 // AnalysisResponse represents the data structure of the analysis result
@@ -22,6 +22,7 @@ type XYValue struct {
 	Y float64 `json:"y"`
 }
 
+// TODO: add logging for all failures
 func AnalysisHandler(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -29,7 +30,7 @@ func AnalysisHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	options := []models.OptionsContract{}
+	options := []options.OptionsContract{}
 	err = json.Unmarshal(body, &options)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -48,24 +49,38 @@ func AnalysisHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	resp := AnalysisResponse{
+		XYValues:        calculateXYValues(options),
+		MaxProfit:       calculateMaxProfit(options),
+		MaxLoss:         calculateMaxLoss(options),
+		BreakEvenPoints: calculateBreakEvenPoints(options),
+	}
+
+	res, err := json.Marshal(resp)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Write(res)
 }
 
-func calculateXYValues(contracts []models.OptionsContract) []XYValue {
-	// Your code here
-	return nil
+// for visialization of profit and loss, the range of X, is +/- 25% of break-even price
+func calculateXYValues(contracts []options.OptionsContract) []XYValue {
+	xyValues := []XYValue{}
+	return xyValues
 }
 
-func calculateMaxProfit(contracts []models.OptionsContract) float64 {
+func calculateMaxProfit(contracts []options.OptionsContract) float64 {
 	// Your code here
 	return 0
 }
 
-func calculateMaxLoss(contracts []models.OptionsContract) float64 {
+func calculateMaxLoss(contracts []options.OptionsContract) float64 {
 	// Your code here
 	return 0
 }
 
-func calculateBreakEvenPoints(contracts []models.OptionsContract) []float64 {
+func calculateBreakEvenPoints(contracts []options.OptionsContract) []float64 {
 	// Your code here
 	return nil
 }
