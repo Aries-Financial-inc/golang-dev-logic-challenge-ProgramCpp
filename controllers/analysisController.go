@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"encoding/json"
+	"io"
 	"net/http"
 
 	"github.com/aries-financial-inc/options-service/models"
@@ -21,7 +23,31 @@ type XYValue struct {
 }
 
 func AnalysisHandler(w http.ResponseWriter, r *http.Request) {
-	// Your code here
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	options := []models.OptionsContract{}
+	err = json.Unmarshal(body, &options)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if len(options) != 4 {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	for _, o := range options {
+		if err := o.IsValid(); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+	}
+
 }
 
 func calculateXYValues(contracts []models.OptionsContract) []XYValue {

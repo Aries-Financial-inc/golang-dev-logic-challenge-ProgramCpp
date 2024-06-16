@@ -9,5 +9,5 @@ var (
 	ErrInvalidBidPrice       = errors.New("invalid bid price")
 	ErrAskBidMismatch        = errors.New("ask price must be greater than bid price")
 	ErrInvalidExpirationDate = errors.New("invalid expiration date")
-	ErrInvalidPosition       = errors.New("invalid position")
+	ErrInvalidLongShort      = errors.New("invalid longShort")
 )
