@@ -95,3 +95,7 @@ func (o OptionsContract) CalculateBreakEvenPoint() float64 {
 func (o OptionsContract) CalculateProfitOrLoss(price float64) float64 {
 	return 0.0
 }
+
+func (o OptionsContract) CalculateUnderlyingPriceAtMaxProfitOrLoss() float64 {
+	return 0.0
+}
