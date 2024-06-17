@@ -1,6 +1,8 @@
 package tests
 
 import (
+	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -218,34 +220,34 @@ func TestAnalysisEndpoint(t *testing.T) {
 	t.Run("successful analysis", func(t *testing.T) {
 		req, err := http.NewRequest(http.MethodPost, "/analyze", strings.NewReader(`[
 		{
-   			"strike_price": 100, 
+    		"strike_price": 100, 
     		"type": "Call", 
     		"bid": 10.05, 
     		"ask": 12.04, 
     		"long_short": "long", 
     		"expiration_date": "2025-12-17T00:00:00Z"
   		},
-		{
-   			"strike_price": 100, 
+  		{
+    		"strike_price": 102.50, 
     		"type": "Call", 
-    		"bid": 10.05, 
-    		"ask": 12.04, 
+    		"bid": 12.10, 
+    		"ask": 14, 
     		"long_short": "long", 
     		"expiration_date": "2025-12-17T00:00:00Z"
   		},
-		{
-   			"strike_price": 100, 
-    		"type": "Call", 
-    		"bid": 10.05, 
-    		"ask": 12.04, 
-    		"long_short": "long", 
+  		{
+    		"strike_price": 103, 
+    		"type": "Put", 
+    		"bid": 14, 
+    		"ask": 15.50, 
+    		"long_short": "short", 
     		"expiration_date": "2025-12-17T00:00:00Z"
   		},
-		{
-   			"strike_price": 100, 
-    		"type": "Call", 
-    		"bid": 10.05, 
-    		"ask": 12.04, 
+  		{
+    		"strike_price": 105, 
+    		"type": "Put", 
+    		"bid": 16, 
+    		"ask": 18, 
     		"long_short": "long", 
     		"expiration_date": "2025-12-17T00:00:00Z"
   		}]`))
@@ -254,7 +256,89 @@ func TestAnalysisEndpoint(t *testing.T) {
 		controllers.AnalysisHandler(res, req)
 		assert.Equal(t, http.StatusOK, res.Code)
 
-		// TODO: validate response body
+		resBody, err := io.ReadAll(res.Result().Body)
+		res.Result().Body.Close()
+		assert.NoError(t, err)
+
+		assert.True(t, json.Valid(resBody))
+		assert.JSONEq(t, `
+		{
+    		"xy_values": [
+				{
+            		"x": 100,
+            		"y": -12.04
+        		},
+        		{
+            		"x": 102.50,
+            		"y": -14
+        		},
+        		{
+            		"x": 103,
+            		"y": 14
+        		},
+        		{
+            		"x": 105,
+            		"y": -18
+        		},
+        		{
+            		"x": 112.04,
+            		"y": 0
+        		},
+        		{
+            		"x": 116.5,
+            		"y": 0
+        		},
+        		{
+            		"x": 89,
+            		"y": 0
+        		},
+        		{
+            		"x": 87,
+            		"y": 0
+        		},
+        		{
+            		"x": 0,
+            		"y": -12.04
+        		},
+        		{
+            		"x": 0,
+            		"y": -14
+        		},
+        		{
+            		"x": 0,
+            		"y": -89
+        		},
+        		{
+            		"x": 0,
+            		"y": 87
+        		},
+        		{
+            		"x": 210,
+            		"y": 97.96
+        		},
+        		{
+            		"x": 210,
+            		"y": 93.50
+        		},
+        		{
+            		"x": 210,
+            		"y": 14
+        		},
+        		{
+            		"x": 210,
+            		"y": -18
+        		}
+			],
+    		"max_profit": 97.96,
+   		 	"max_loss": -89.0,
+   			"break_even_points": [
+        		112.04,
+        		116.5,
+        		89,
+        		87
+    		]
+		}
+		`, (string)(resBody))
 	})
 }
 
