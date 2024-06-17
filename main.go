@@ -1,17 +1,13 @@
 package main
 
 import (
-	"net/http"
 	"fmt"
+
+	"github.com/aries-financial-inc/options-service/routes"
 )
 
 func main() {
-	http.HandleFunc("/analyze", analyzeHandler)
-
-	fmt.Println("Starting server on port 8080")
-	http.ListenAndServe(":8080", nil)
-}
-
-func analyzeHandler(w http.ResponseWriter, r *http.Request) {
-	// Your code here
+	fmt.Println("listening on port 8080...")
+	router := routes.SetupRouter()
+	router.Run() // listen and serve on 0.0.0.0:8080
 }
