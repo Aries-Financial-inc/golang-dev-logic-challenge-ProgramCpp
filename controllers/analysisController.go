@@ -54,10 +54,10 @@ func AnalysisHandler(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: fix repeated computations of X and Y values
 	resp := AnalysisResponse{
-		XYValues:        calculateXYValues(options),
-		MaxProfit:       calculateMaxProfit(options),
-		MaxLoss:         calculateMaxLoss(options),
-		BreakEvenPoints: calculateBreakEvenPoints(options),
+		XYValues:        CalculateXYValues(options),
+		MaxProfit:       CalculateMaxProfit(options),
+		MaxLoss:         CalculateMaxLoss(options),
+		BreakEvenPoints: CalculateBreakEvenPoints(options),
 	}
 
 	res, err := json.Marshal(resp)
@@ -72,7 +72,7 @@ func AnalysisHandler(w http.ResponseWriter, r *http.Request) {
 // the range of X for the graph is the (0, maximum of 2 * strike price), for all options
 // for boundary X values, calculate profits or losses for all options.  this enables comparision of options' profits and losses for a given price
 // the values of X are min X, max X (boundaries of X range), all strike prices and all break even points
-func calculateXYValues(contracts []options.OptionsContract) []XYValue {
+func CalculateXYValues(contracts []options.OptionsContract) []XYValue {
 	xMin := 0.0
 	xMax := 0.0
 
@@ -95,9 +95,9 @@ func calculateXYValues(contracts []options.OptionsContract) []XYValue {
 }
 
 // return maximum of profits for all options in the underlying price range at expiry
-func calculateMaxProfit(contracts []options.OptionsContract) float64 {
+func CalculateMaxProfit(contracts []options.OptionsContract) float64 {
 	maxProfit := 0.0
-	profitLosses := calculateXYValues(contracts)
+	profitLosses := CalculateXYValues(contracts)
 
 	for _, pl := range profitLosses {
 		if pl.Y > maxProfit {
@@ -108,9 +108,9 @@ func calculateMaxProfit(contracts []options.OptionsContract) float64 {
 }
 
 // return maximum of losses for all options in the underlying price range at expiry
-func calculateMaxLoss(contracts []options.OptionsContract) float64 {
+func CalculateMaxLoss(contracts []options.OptionsContract) float64 {
 	maxLoss := math.MaxFloat64
-	profitLosses := calculateXYValues(contracts)
+	profitLosses := CalculateXYValues(contracts)
 
 	for _, pl := range profitLosses {
 		if pl.Y < maxLoss {
@@ -121,7 +121,7 @@ func calculateMaxLoss(contracts []options.OptionsContract) float64 {
 }
 
 // break even points for each option
-func calculateBreakEvenPoints(contracts []options.OptionsContract) []float64 {
+func CalculateBreakEvenPoints(contracts []options.OptionsContract) []float64 {
 	breakEvens := []float64{}
 	for _, c := range contracts {
 		breakEvens = append(breakEvens, c.CalculateBreakEvenPoint())
