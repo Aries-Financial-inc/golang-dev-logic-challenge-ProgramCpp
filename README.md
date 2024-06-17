@@ -49,3 +49,10 @@ Have fun coding! 🚀
 
 The Aries Financial Team
 
+
+### tests
+run `make test`
+
+### build and run
+run `make build`
+run `./build/options-service`
