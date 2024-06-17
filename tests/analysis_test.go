@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/aries-financial-inc/options-service/controllers"
 	"github.com/aries-financial-inc/options-service/options"
+	"github.com/aries-financial-inc/options-service/routes"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/aries-financial-inc/options-service/errors"
@@ -261,8 +263,8 @@ func TestAnalysisEndpoint(t *testing.T) {
 		assert.NoError(t, err)
 
 		assert.True(t, json.Valid(resBody))
-        // HACK! 
-        // TODO: compare array comparision irrespective of the order. 
+		// HACK!
+		// TODO: compare array comparision irrespective of the order.
 		assert.JSONEq(t, `
 		{
     		"xy_values": [
@@ -345,5 +347,131 @@ func TestAnalysisEndpoint(t *testing.T) {
 }
 
 func TestIntegration(t *testing.T) {
-	// Your code here
+	router := routes.SetupRouter()
+	server := httptest.NewServer(router)
+	defer server.Close()
+
+	// TODO: use testdata and golden files
+	reqStr := `[
+		{
+    		"strike_price": 100, 
+    		"type": "Call", 
+    		"bid": 10.05, 
+    		"ask": 12.04, 
+    		"long_short": "long", 
+    		"expiration_date": "2025-12-17T00:00:00Z"
+  		},
+  		{
+    		"strike_price": 102.50, 
+    		"type": "Call", 
+    		"bid": 12.10, 
+    		"ask": 14, 
+    		"long_short": "long", 
+    		"expiration_date": "2025-12-17T00:00:00Z"
+  		},
+  		{
+    		"strike_price": 103, 
+    		"type": "Put", 
+    		"bid": 14, 
+    		"ask": 15.50, 
+    		"long_short": "short", 
+    		"expiration_date": "2025-12-17T00:00:00Z"
+  		},
+  		{
+    		"strike_price": 105, 
+    		"type": "Put", 
+    		"bid": 16, 
+    		"ask": 18, 
+    		"long_short": "long", 
+    		"expiration_date": "2025-12-17T00:00:00Z"
+  		}]
+	`
+
+	res, err := http.Post(server.URL+"/analyze", "application/json", bytes.NewBufferString(reqStr))
+	assert.NoError(t, err)
+
+	resBody, err := io.ReadAll(res.Body)
+	res.Body.Close()
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, res.StatusCode)
+
+	assert.JSONEq(t, `
+		{
+    		"xy_values": [
+				{
+                    "x": 100,
+                    "y": -12.04
+                },
+                {
+                    "x": 112.04,
+                    "y": 0
+                },
+                {
+                    "x": 102.50,
+                    "y": -14
+                },
+                {
+                    "x": 116.5,
+                    "y": 0
+                },
+                {
+                    "x": 103,
+                    "y": 14
+                },
+                {
+                    "x": 89,
+                    "y": 0
+                },
+                {
+                    "x": 105,
+                    "y": -18
+                },
+                {
+                    "x": 87,
+                    "y": 0
+                },
+                {
+                    "x": 0,
+                    "y": -12.04
+                },
+                {
+                    "x": 210,
+                    "y": 97.96
+                },
+                {
+                    "x": 0,
+                    "y": -14
+                },
+                {
+                    "x": 210,
+                    "y": 93.50
+                },
+                {
+                    "x": 0,
+                    "y": -89
+                },
+                {
+                    "x": 210,
+                    "y": 14
+                },
+                {
+                    "x": 0,
+                    "y": 87
+                },
+                {
+                    "x": 210,
+                    "y": -18
+                }
+			],
+    		"max_profit": 97.96,
+   		 	"max_loss": -89.0,
+   			"break_even_points": [
+        		112.04,
+        		116.5,
+        		89,
+        		87
+    		]
+		}
+		`, (string)(resBody))
 }
