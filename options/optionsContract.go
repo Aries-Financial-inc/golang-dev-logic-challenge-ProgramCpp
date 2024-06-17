@@ -10,16 +10,16 @@ import (
 
 // string comparision is inefficient. okay for the use case.
 // TODO: use int type. with custom codec
-type optionsType string
+type OptionsType string
 
 const (
-	CALL optionsType = "call"
-	PUT  optionsType = "put"
+	CALL OptionsType = "call"
+	PUT  OptionsType = "put"
 )
 
 // values are case insensitive
-func (o optionsType) IsValid() error {
-	switch (optionsType)(strings.ToLower((string)(o))) {
+func (o OptionsType) IsValid() error {
+	switch (OptionsType)(strings.ToLower((string)(o))) {
 	case CALL, PUT:
 	default:
 		return appErrors.ErrInvalidOptionsType
@@ -27,18 +27,22 @@ func (o optionsType) IsValid() error {
 	return nil
 }
 
+func (o OptionsType) Value() OptionsType {
+	return (OptionsType)(strings.ToLower((string)(o)))
+}
+
 // TODO: not a readable name. being consistent with the contract.
 // maybe name it position along with contract change
 // do not introduce new terminology
-type longShort string
+type LongShort string
 
 const (
-	LONG  longShort = "long"
-	SHORT longShort = "short"
+	LONG  LongShort = "long"
+	SHORT LongShort = "short"
 )
 
-func (l longShort) IsValid() error {
-	switch (longShort)(strings.ToLower((string)(l))) {
+func (l LongShort) IsValid() error {
+	switch (LongShort)(strings.ToLower((string)(l))) {
 	case LONG, SHORT:
 	default:
 		return appErrors.ErrInvalidLongShort
@@ -46,14 +50,18 @@ func (l longShort) IsValid() error {
 	return nil
 }
 
+func (o LongShort) Value() LongShort {
+	return (LongShort)(strings.ToLower((string)(o)))
+}
+
 type OptionsContract struct {
 	// cannot name the variable "type"
-	OptionsType    optionsType `json:"type"`
+	OptionsType    OptionsType `json:"type"`
 	StrikePrice    float64     `json:"strike_price"`
 	Bid            float64     `json:"bid"`
 	Ask            float64     `json:"ask"`
 	ExpirationDate time.Time   `json:"expiration_date"`
-	LongShort      longShort   `json:"long_short"`
+	LongShort      LongShort   `json:"long_short"`
 }
 
 func (o OptionsContract) IsValid() error {
@@ -90,19 +98,19 @@ func (o OptionsContract) IsValid() error {
 
 func (o OptionsContract) CalculateBreakEvenPoint() float64 {
 	// long call
-	if o.LongShort == LONG && o.OptionsType == CALL {
+	if o.LongShort == LONG.Value() && o.OptionsType.Value() == CALL {
 		return precisionTotwodecimalPlaces(o.StrikePrice + o.Ask)
 	}
 	// short call
-	if o.LongShort == SHORT && o.OptionsType == CALL {
+	if o.LongShort == SHORT.Value() && o.OptionsType.Value() == CALL {
 		return precisionTotwodecimalPlaces(o.StrikePrice + o.Bid)
 	}
 	// long put
-	if o.LongShort == LONG && o.OptionsType == PUT {
+	if o.LongShort == LONG.Value() && o.OptionsType.Value() == PUT {
 		return precisionTotwodecimalPlaces(o.StrikePrice - o.Ask)
 	}
 	// short put
-	if o.LongShort == SHORT && o.OptionsType == PUT {
+	if o.LongShort == SHORT.Value() && o.OptionsType.Value() == PUT {
 		return precisionTotwodecimalPlaces(o.StrikePrice - o.Bid)
 	}
 	return 0.0
@@ -110,19 +118,19 @@ func (o OptionsContract) CalculateBreakEvenPoint() float64 {
 
 func (o OptionsContract) CalculateProfitOrLoss(price float64) float64 {
 	// long call
-	if o.LongShort == LONG && o.OptionsType == CALL {
+	if o.LongShort.Value() == LONG && o.OptionsType.Value() == CALL {
 		return precisionTotwodecimalPlaces(maxFloat64(0, price-o.StrikePrice) - o.Ask)
 	}
 	// short call
-	if o.LongShort == SHORT && o.OptionsType == CALL {
+	if o.LongShort.Value() == SHORT && o.OptionsType.Value() == CALL {
 		return precisionTotwodecimalPlaces(o.Bid - maxFloat64(0, price-o.StrikePrice))
 	}
 	// long put
-	if o.LongShort == LONG && o.OptionsType == PUT {
+	if o.LongShort.Value() == LONG && o.OptionsType.Value() == PUT {
 		return precisionTotwodecimalPlaces(maxFloat64(o.StrikePrice-price, 0) - o.Ask)
 	}
 	// short put
-	if o.LongShort == SHORT && o.OptionsType == PUT {
+	if o.LongShort.Value() == SHORT && o.OptionsType.Value() == PUT {
 		return precisionTotwodecimalPlaces(o.Bid - max(0, o.StrikePrice-price))
 	}
 	return 0.0
@@ -139,5 +147,5 @@ func maxFloat64(a, b float64) float64 {
 
 // a simple and naive solution, assuming prices are not too large
 func precisionTotwodecimalPlaces(f float64) float64 {
-	return float64(int(f * 100)) / 100
+	return (float64(int(f * 100))) / 100
 }

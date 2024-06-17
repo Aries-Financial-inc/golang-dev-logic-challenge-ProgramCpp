@@ -7,6 +7,30 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestOptionsTypeIsCaseInsensitive(t *testing.T) {
+	assert.Equal(t, options.CALL, (options.OptionsType)("Call").Value())
+	assert.Equal(t, options.CALL, (options.OptionsType)("call").Value())
+	assert.Equal(t, options.CALL, (options.OptionsType)("CALL").Value())
+	assert.Equal(t, options.CALL, (options.OptionsType)("cAll").Value())
+
+	assert.Equal(t, options.PUT, (options.OptionsType)("Put").Value())
+	assert.Equal(t, options.PUT, (options.OptionsType)("put").Value())
+	assert.Equal(t, options.PUT, (options.OptionsType)("PUT").Value())
+	assert.Equal(t, options.PUT, (options.OptionsType)("pUt").Value())
+}
+
+
+func TestLongShortIsCaseInsensitive(t *testing.T) {
+	assert.Equal(t, options.LONG, (options.LongShort)("Long").Value())
+	assert.Equal(t, options.LONG, (options.LongShort)("long").Value())
+	assert.Equal(t, options.LONG, (options.LongShort)("LONG").Value())
+	assert.Equal(t, options.LONG, (options.LongShort)("lOng").Value())
+
+	assert.Equal(t, options.SHORT, (options.LongShort)("Short").Value())
+	assert.Equal(t, options.SHORT, (options.LongShort)("short").Value())
+	assert.Equal(t, options.SHORT, (options.LongShort)("SHORT").Value())
+	assert.Equal(t, options.SHORT, (options.LongShort)("sHort").Value())
+}
 func TestCalculateBreakEvenPoint(t *testing.T) {
 	// strike + ask
 	assert.Equal(t, 116.5, options.OptionsContract{
