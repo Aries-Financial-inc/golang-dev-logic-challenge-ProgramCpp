@@ -89,6 +89,22 @@ func (o OptionsContract) IsValid() error {
 }
 
 func (o OptionsContract) CalculateBreakEvenPoint() float64 {
+	// long call
+	if o.LongShort == LONG && o.OptionsType == CALL {
+		return o.StrikePrice + o.Ask
+	}
+	// short call
+	if o.LongShort == SHORT && o.OptionsType == CALL {
+		return o.StrikePrice + o.Bid
+	}
+	// long put
+	if o.LongShort == LONG && o.OptionsType == PUT {
+		return o.StrikePrice - o.Ask
+	}
+	// short put
+	if o.LongShort == SHORT && o.OptionsType == PUT {
+		return o.StrikePrice - o.Bid
+	}
 	return 0.0
 }
 
