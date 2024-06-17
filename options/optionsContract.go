@@ -91,27 +91,53 @@ func (o OptionsContract) IsValid() error {
 func (o OptionsContract) CalculateBreakEvenPoint() float64 {
 	// long call
 	if o.LongShort == LONG && o.OptionsType == CALL {
-		return o.StrikePrice + o.Ask
+		return precisionTotwodecimalPlaces(o.StrikePrice + o.Ask)
 	}
 	// short call
 	if o.LongShort == SHORT && o.OptionsType == CALL {
-		return o.StrikePrice + o.Bid
+		return precisionTotwodecimalPlaces(o.StrikePrice + o.Bid)
 	}
 	// long put
 	if o.LongShort == LONG && o.OptionsType == PUT {
-		return o.StrikePrice - o.Ask
+		return precisionTotwodecimalPlaces(o.StrikePrice - o.Ask)
 	}
 	// short put
 	if o.LongShort == SHORT && o.OptionsType == PUT {
-		return o.StrikePrice - o.Bid
+		return precisionTotwodecimalPlaces(o.StrikePrice - o.Bid)
 	}
 	return 0.0
 }
 
 func (o OptionsContract) CalculateProfitOrLoss(price float64) float64 {
+	// long call
+	if o.LongShort == LONG && o.OptionsType == CALL {
+		return precisionTotwodecimalPlaces(maxFloat64(0, price-o.StrikePrice) - o.Ask)
+	}
+	// short call
+	if o.LongShort == SHORT && o.OptionsType == CALL {
+		return precisionTotwodecimalPlaces(o.Bid - maxFloat64(0, price-o.StrikePrice))
+	}
+	// long put
+	if o.LongShort == LONG && o.OptionsType == PUT {
+		return precisionTotwodecimalPlaces(maxFloat64(o.StrikePrice-price, 0) - o.Ask)
+	}
+	// short put
+	if o.LongShort == SHORT && o.OptionsType == PUT {
+		return precisionTotwodecimalPlaces(o.Bid - max(0, o.StrikePrice-price))
+	}
 	return 0.0
 }
 
-func (o OptionsContract) CalculateUnderlyingPriceAtMaxProfitOrLoss() float64 {
-	return 0.0
+// TODO: move to separate utils
+func maxFloat64(a, b float64) float64 {
+	if a > b {
+		return a
+	}
+
+	return b
+}
+
+// a simple and naive solution, assuming prices are not too large
+func precisionTotwodecimalPlaces(f float64) float64 {
+	return float64(int(f * 100)) / 100
 }
